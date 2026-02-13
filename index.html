@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クレドカード</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #1c1a17;
+  --surface: #252320;
+  --border: #3a3732;
+  --text: #f5f0e8;
+  --muted: #8a8070;
+  --blue: #4a9eff;
+  --blue-bg: #0d2a4a;
+  --red: #ff5a5a;
+  --red-bg: #4a0d0d;
+  --yellow: #ffd93d;
+  --yellow-bg: #3a2d00;
+  --green: #4adf8a;
+  --green-bg: #0a3320;
+  --orange: #ff8c42;
+  --orange-bg: #3a1a00;
+  --black: #111;
+  --black-card: #2a2520;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== SCREENS ===== */
+.screen { display: none; }
+.screen.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ===== TITLE SCREEN ===== */
+#titleScreen {
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #2a2520 0%, #1c1a17 70%);
+  gap: 0;
+}
+
+.title-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(60px, 12vw, 100px);
+  letter-spacing: 8px;
+  background: linear-gradient(135deg, #ffd93d, #ff8c42, #ff5a5a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.title-sub {
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  margin-bottom: 60px;
+}
+.title-cards {
+  display: flex;
+  gap: -8px;
+  margin-bottom: 60px;
+  perspective: 600px;
+}
+.mini-card {
+  width: 48px;
+  height: 72px;
+  border-radius: 8px;
+  margin: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  transform: rotate(var(--r)) translateY(var(--y));
+  transition: transform 0.3s;
+}
+.mini-card:hover { transform: rotate(0) translateY(-12px) scale(1.1); }
+
+.start-btn {
+  padding: 18px 60px;
+  background: linear-gradient(135deg, #ffd93d, #ff8c42);
+  border: none;
+  border-radius: 100px;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1c1a17;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  box-shadow: 0 8px 32px rgba(255,180,50,0.3);
+  transition: all 0.2s;
+}
+.start-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(255,180,50,0.5); }
+
+/* ===== PLAYER SETUP ===== */
+#setupScreen {
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 24px;
+}
+.setup-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 4px;
+  color: var(--yellow);
+}
+.setup-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.setup-label { font-size: 12px; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 4px; }
+.setup-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.setup-input:focus { border-color: var(--yellow); }
+.player-count-btns { display: flex; gap: 10px; }
+.count-btn {
+  flex: 1;
+  padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.count-btn.active { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
+.ai-players-list { display: flex; flex-direction: column; gap: 10px; }
+.ai-player-row { display: flex; gap: 10px; align-items: center; }
+.ai-player-row .setup-input { flex: 1; }
+.deal-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffd93d, #ff8c42);
+  border: none;
+  border-radius: 12px;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1c1a17;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: all 0.2s;
+}
+.deal-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+/* ===== GAME SCREEN ===== */
+#gameScreen {
+  padding: 0;
+  flex-direction: column;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.game-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, #ffd93d, #ff8c42);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.direction-badge {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  padding: 4px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--muted);
+}
+
+/* Other players area */
+.opponents-area {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  background: rgba(0,0,0,0.2);
+}
+.opponent-card {
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-width: 110px;
+  position: relative;
+}
+.opponent-card.active-turn { border-color: var(--yellow); box-shadow: 0 0 16px rgba(255,217,61,0.3); }
+.opponent-name { font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--muted); }
+.opponent-hand-count {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--text);
+}
+.opponent-hand-count span { font-size: 12px; color: var(--muted); margin-left: 2px; }
+.opponent-last-action {
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+  background: rgba(0,0,0,0.3);
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+.fleet-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--red);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+  animation: pulse 1s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* Center play area */
+.play-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px;
+  position: relative;
+}
+
+.pile-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.pile-label { font-size: 10px; letter-spacing: 0.2em; color: var(--muted); }
+
+/* CARD base */
+.card {
+  width: 80px;
+  height: 120px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px;
+  cursor: pointer;
+  position: relative;
+  border: 2px solid rgba(255,255,255,0.1);
+  transition: transform 0.15s, box-shadow 0.15s;
+  user-select: none;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.3;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.card.playable { box-shadow: 0 0 0 3px var(--yellow), 0 8px 24px rgba(0,0,0,0.5); }
+.card.playable:hover { transform: translateY(-8px); }
+.card.not-playable { opacity: 0.4; cursor: not-allowed; }
+.card.not-playable:hover { transform: none; }
+
+.card.blue { background: linear-gradient(135deg, #1a4a8a, #2a6acc); color: white; }
+.card.red { background: linear-gradient(135deg, #8a1a1a, #cc2a2a); color: white; }
+.card.yellow { background: linear-gradient(135deg, #6a5000, #c49000); color: white; }
+.card.green { background: linear-gradient(135deg, #0a4a20, #1a8a40); color: white; }
+.card.orange { background: linear-gradient(135deg, #6a2a00, #c05000); color: white; }
+.card.black { background: linear-gradient(135deg, #1a1a1a, #333); color: #ffd93d; }
+.card.back {
+  background: linear-gradient(135deg, #2a2520, #3a3530);
+  border: 2px solid #3a3530;
+  cursor: default;
+}
+.card.back::after {
+  content: 'CREDO';
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  color: var(--border);
+  letter-spacing: 2px;
+}
+
+.card-text { font-size: 10px; font-weight: 700; line-height: 1.3; text-align: center; padding: 4px; }
+.card-special { font-size: 22px; line-height: 1; margin-bottom: 4px; }
+.card-special-name { font-size: 8px; letter-spacing: 0.1em; opacity: 0.8; }
+
+/* top card display */
+.top-card-display {
+  width: 100px;
+  height: 150px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 3px solid rgba(255,255,255,0.2);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  transition: all 0.3s;
+}
+/* Apply same color gradients to top-card-display as .card */
+.top-card-display.blue { background: linear-gradient(135deg, #1a4a8a, #2a6acc); color: white; border-color: #4a9eff; }
+.top-card-display.red  { background: linear-gradient(135deg, #8a1a1a, #cc2a2a); color: white; border-color: #ff5a5a; }
+.top-card-display.yellow { background: linear-gradient(135deg, #6a5000, #c49000); color: white; border-color: #ffd93d; }
+.top-card-display.green  { background: linear-gradient(135deg, #0a4a20, #1a8a40); color: white; border-color: #4adf8a; }
+.top-card-display.orange { background: linear-gradient(135deg, #6a2a00, #c05000); color: white; border-color: #ff8c42; }
+.top-card-display.black  { background: linear-gradient(135deg, #1a1a1a, #333);    color: #ffd93d; border-color: #555; }
+
+/* Current color indicator banner */
+.color-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 18px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin-top: 10px;
+  border: 2px solid;
+  transition: all 0.3s;
+}
+.color-indicator.blue   { background: var(--blue-bg);   border-color: var(--blue);   color: var(--blue); }
+.color-indicator.red    { background: var(--red-bg);    border-color: var(--red);    color: var(--red); }
+.color-indicator.yellow { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
+.color-indicator.green  { background: var(--green-bg);  border-color: var(--green);  color: var(--green); }
+.color-indicator.orange { background: var(--orange-bg); border-color: var(--orange); color: var(--orange); }
+.color-indicator.black  { background: #1a1a1a; border-color: #555; color: #aaa; }
+
+.draw-pile {
+  width: 90px;
+  height: 135px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2a2520, #3a3530);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #1a1815, 8px 8px 0 #151310;
+  transition: all 0.2s;
+  position: relative;
+}
+.draw-pile:hover { transform: translateY(-4px); }
+.draw-pile.disabled { cursor: not-allowed; opacity: 0.5; }
+.draw-pile-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-align: center;
+}
+.deck-count-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 10px;
+  color: var(--muted);
+  padding: 2px 8px;
+}
+
+/* Player hand */
+.player-area {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+}
+.player-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.player-name-tag {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--yellow);
+}
+.player-turn-tag {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: var(--yellow-bg);
+  border: 1px solid var(--yellow);
+  color: var(--yellow);
+  letter-spacing: 0.1em;
+}
+.player-turn-tag.waiting {
+  background: var(--bg);
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.hand-container {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 0 12px;
+  align-items: flex-end;
+  min-height: 140px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* Bottom action bar */
+.action-bar {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+.action-btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: all 0.2s;
+  flex: 1;
+}
+.btn-fleet {
+  background: linear-gradient(135deg, #ff5a5a, #ff8c42);
+  color: white;
+}
+.btn-fleet:hover { opacity: 0.9; transform: scale(1.02); }
+.btn-fleet:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.btn-pass {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.btn-pass:hover { border-color: var(--muted); color: var(--text); }
+.btn-pass:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Log area */
+.game-log {
+  padding: 8px 20px;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid var(--border);
+  min-height: 40px;
+}
+.log-text {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+.log-text.highlight { color: var(--yellow); }
+.log-text.error { color: var(--red); }
+.log-text.success { color: var(--green); }
+
+/* Color picker modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+}
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+  color: var(--yellow);
+}
+.modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+.color-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.color-btn {
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+.color-btn:hover { transform: scale(1.05); }
+.color-btn.blue { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.color-btn.red { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+.color-btn.yellow { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); }
+.color-btn.green { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+.color-btn.orange { background: var(--orange-bg); border-color: var(--orange); color: var(--orange); }
+
+/* Win screen */
+#winScreen {
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #2a2520 0%, #1c1a17 70%);
+  gap: 24px;
+}
+.win-emoji { font-size: 80px; animation: bounce 0.6s ease-in-out infinite alternate; }
+@keyframes bounce { from{transform:translateY(0)} to{transform:translateY(-20px)} }
+.win-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 56px;
+  letter-spacing: 6px;
+  background: linear-gradient(135deg, #ffd93d, #ff8c42);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.win-name { font-size: 20px; font-weight: 700; color: var(--text); }
+.play-again-btn {
+  padding: 16px 48px;
+  background: linear-gradient(135deg, #ffd93d, #ff8c42);
+  border: none;
+  border-radius: 100px;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1c1a17;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.play-again-btn:hover { transform: translateY(-3px); }
+
+/* Turn indicator overlay */
+.turn-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.turn-overlay.show { display: flex; }
+.turn-msg {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  letter-spacing: 4px;
+  color: var(--yellow);
+}
+.turn-sub { font-size: 14px; color: var(--muted); }
+.turn-ok-btn {
+  margin-top: 16px;
+  padding: 14px 40px;
+  background: var(--yellow);
+  border: none;
+  border-radius: 100px;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1c1a17;
+  cursor: pointer;
+}
+
+/* Rule reference */
+.rule-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+}
+.rule-btn:hover { border-color: var(--muted); color: var(--text); }
+
+.rules-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  overflow-y: auto;
+  padding: 20px;
+}
+.rules-modal.show { display: block; }
+.rules-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.rules-inner h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 3px;
+  color: var(--yellow);
+  margin-bottom: 20px;
+}
+.rule-section { margin-bottom: 20px; }
+.rule-section h3 { font-size: 12px; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 8px; }
+.rule-section p, .rule-section li { font-size: 13px; line-height: 1.8; color: var(--text); }
+.rule-section ul { padding-left: 16px; }
+.close-rules {
+  width: 100%;
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  margin-top: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="titleScreen" class="screen active">
+  <div class="title-logo">クレドカード</div>
+  <div class="title-sub">CREDO CARD GAME</div>
+  <div class="title-cards">
+    <div class="mini-card" style="background:linear-gradient(135deg,#1a4a8a,#2a6acc);--r:-8deg;--y:4px">青</div>
+    <div class="mini-card" style="background:linear-gradient(135deg,#8a1a1a,#cc2a2a);--r:-3deg;--y:-6px">赤</div>
+    <div class="mini-card" style="background:linear-gradient(135deg,#6a5000,#c49000);--r:2deg;--y:-2px">黄</div>
+    <div class="mini-card" style="background:linear-gradient(135deg,#0a4a20,#1a8a40);--r:6deg;--y:2px">緑</div>
+    <div class="mini-card" style="background:linear-gradient(135deg,#6a2a00,#c05000);--r:10deg;--y:-4px">橙</div>
+  </div>
+  <button class="start-btn" onclick="showSetup()">ゲームスタート</button>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="setupScreen" class="screen">
+  <div class="setup-title">プレイヤー設定</div>
+  <div class="setup-box">
+    <div>
+      <div class="setup-label">あなたの名前</div>
+      <input class="setup-input" id="playerName" type="text" placeholder="名前を入力" value="プレイヤー1">
+    </div>
+    <div>
+      <div class="setup-label">AIプレイヤー人数</div>
+      <div class="player-count-btns">
+        <button class="count-btn" onclick="setAiCount(1)">1人</button>
+        <button class="count-btn active" onclick="setAiCount(2)">2人</button>
+        <button class="count-btn" onclick="setAiCount(3)">3人</button>
+      </div>
+    </div>
+    <div id="aiNameArea">
+      <div class="setup-label">AIの名前</div>
+      <div class="ai-players-list" id="aiNameList"></div>
+    </div>
+    <button class="deal-btn" onclick="startGame()">🃏 カードを配る</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="game-logo">クレドカード</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="direction-badge" id="directionBadge">→ 時計回り</div>
+      <button class="rule-btn" onclick="toggleRules()">ルール</button>
+    </div>
+  </div>
+
+  <div class="opponents-area" id="opponentsArea"></div>
+
+  <div class="play-area">
+    <div class="pile-wrap">
+      <div class="pile-label">山札</div>
+      <div class="draw-pile" id="drawPile" onclick="drawCard()">
+        <div>
+          <div class="draw-pile-text">DRAW</div>
+          <div class="draw-pile-text">CREDO</div>
+        </div>
+        <div class="deck-count-badge" id="deckCount">0</div>
+      </div>
+    </div>
+
+    <div class="pile-wrap">
+      <div class="pile-label">場のカード</div>
+      <div class="top-card-display" id="topCardDisplay"></div>
+      <div class="color-indicator" id="colorIndicator"></div>
+    </div>
+  </div>
+
+  <div class="game-log"><div class="log-text" id="logText">ゲーム開始！</div></div>
+
+  <div class="player-area">
+    <div class="player-info-row">
+      <div class="player-name-tag" id="playerNameTag">あなた</div>
+      <div class="player-turn-tag" id="playerTurnTag">あなたのターン</div>
+    </div>
+    <div class="hand-container" id="handContainer"></div>
+  </div>
+
+  <div class="action-bar">
+    <button class="action-btn btn-fleet" id="fleetBtn" onclick="declareFleet()" disabled>🏁 フリート！！</button>
+    <button class="action-btn btn-pass" id="passBtn" onclick="endTurn()" disabled>パス</button>
+  </div>
+</div>
+
+<!-- WIN SCREEN -->
+<div id="winScreen" class="screen">
+  <div class="win-emoji">🏆</div>
+  <div class="win-title">WINNER!</div>
+  <div class="win-name" id="winnerName"></div>
+  <button class="play-again-btn" onclick="showTitle()">もう一度遊ぶ</button>
+</div>
+
+<!-- Color picker modal -->
+<div class="modal-overlay" id="colorModal">
+  <div class="modal-box">
+    <div class="modal-title">色を選択</div>
+    <div class="modal-sub">次に出せる色を指定してください</div>
+    <div class="color-btns">
+      <button class="color-btn blue" onclick="chooseColor('blue')">🔵 青</button>
+      <button class="color-btn red" onclick="chooseColor('red')">🔴 赤</button>
+      <button class="color-btn yellow" onclick="chooseColor('yellow')">🟡 黄</button>
+      <button class="color-btn green" onclick="chooseColor('green')">🟢 緑</button>
+      <button class="color-btn orange" onclick="chooseColor('orange')">🟠 オレンジ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Turn overlay -->
+<div class="turn-overlay" id="turnOverlay">
+  <div class="turn-msg" id="turnMsg"></div>
+  <div class="turn-sub" id="turnSub"></div>
+  <button class="turn-ok-btn" onclick="hideTurnOverlay()">OK</button>
+</div>
+
+<!-- Rules modal -->
+<div class="rules-modal" id="rulesModal">
+  <div class="rules-inner">
+    <h2>ルール説明</h2>
+    <div class="rule-section">
+      <h3>基本ルール</h3>
+      <ul>
+        <li>自分の手番に「出せるカード」を1枚出す</li>
+        <li>出せない場合は山札から1枚引く（引いたカードが出せれば出してもOK）</li>
+        <li>最初に手札を0枚にした人の勝ち</li>
+        <li>特殊カードでは上がれない</li>
+      </ul>
+    </div>
+    <div class="rule-section">
+      <h3>出せるカードの条件</h3>
+      <ul>
+        <li>同じ色のカードは出せる</li>
+        <li>クレドのフレーズとして文章が繋がるカードは色違いでも出せる（英語↔日本語もOK）</li>
+        <li>間違えたカードを指摘された場合は1枚引く</li>
+      </ul>
+    </div>
+    <div class="rule-section">
+      <h3>特殊カード</h3>
+      <ul>
+        <li>🖤 ワイルド古里：次の人が出すカードの色を指定できる</li>
+        <li>JP：次の人は2枚引く（前の場の色と同じ色のみ出せる）</li>
+        <li>栗原さん：順番が逆回りになる（前の場の色と同じ色のみ出せる）</li>
+      </ul>
+    </div>
+    <div class="rule-section">
+      <h3>フリート宣言</h3>
+      <ul>
+        <li>手札が残り1枚になったら「フリート！！」ボタンを押す</li>
+        <li>押し忘れを他プレイヤーに指摘されると2枚引く</li>
+      </ul>
+    </div>
+    <button class="close-rules" onclick="toggleRules()">閉じる</button>
+  </div>
+</div>
+
+<script>
+// ===== CARD DATA =====
+const CREDO_CHAINS = [
+  // 青: Sincere gratitude
+  { id: 'blue_en', color: 'blue', phrases: ['Sincere', 'gratitude'] },
+  { id: 'blue_jp', color: 'blue', phrases: ['いつでも', '感謝の心を', '忘れない'] },
+  // 赤: Stay cool and stylish
+  { id: 'red_en', color: 'red', phrases: ['Stay', 'cool', 'and', 'stylish'] },
+  { id: 'red_jp', color: 'red', phrases: ['かっこよく', 'いよう！！'] },
+  // 黄: Thrill and Excitement
+  { id: 'yellow_en', color: 'yellow', phrases: ['Thrill and Excitement', 'are our', 'ultimate goals.'] },
+  { id: 'yellow_jp', color: 'yellow', phrases: ['ワクワクを', '追求しよう！！'] },
+  // 緑: Smile is contagious
+  { id: 'green_en', color: 'green', phrases: ['Smile', 'is', 'contagious'] },
+  { id: 'green_jp', color: 'green', phrases: ['笑顔の輪を', '広げよう！！'] },
+  // オレンジ: Always 1% forward
+  { id: 'orange_en', color: 'orange', phrases: ['Always', '1%', 'forward'] },
+  { id: 'orange_jp', color: 'orange', phrases: ['常に', '101％', '頑張ろう！！'] },
+];
+
+// Build all card objects (3 copies each)
+function buildDeck() {
+  const deck = [];
+  let uid = 0;
+
+  // Text cards: 3 copies of each phrase
+  CREDO_CHAINS.forEach(chain => {
+    chain.phrases.forEach((phrase, idx) => {
+      for (let c = 0; c < 3; c++) {
+        deck.push({
+          id: uid++,
+          type: 'text',
+          color: chain.color,
+          chainId: chain.id,
+          phraseIndex: idx,
+          text: phrase,
+          isFirst: idx === 0,
+          isLast: idx === chain.phrases.length - 1,
+          totalInChain: chain.phrases.length,
+        });
+      }
+    });
+  });
+
+  // Special cards
+  // ワイルド古里: 8 black cards
+  for (let i = 0; i < 8; i++) {
+    deck.push({ id: uid++, type: 'wild', color: 'black', text: 'ワイルド\n古里', special: 'wild' });
+  }
+  // JP: 1 per color (5 colors)
+  ['blue','red','yellow','green','orange'].forEach(color => {
+    deck.push({ id: uid++, type: 'special', color, text: 'JP', special: 'draw2' });
+  });
+  // 栗原さん: 1 per color
+  ['blue','red','yellow','green','orange'].forEach(color => {
+    deck.push({ id: uid++, type: 'special', color, text: '栗原さん', special: 'reverse' });
+  });
+
+  return shuffle(deck);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ===== GAME STATE =====
+let state = {};
+
+function initState(players) {
+  const deck = buildDeck();
+  const hands = players.map(() => []);
+
+  // Deal 7 cards each
+  for (let i = 0; i < 7; i++) {
+    players.forEach((_, pi) => hands[pi].push(deck.pop()));
+  }
+
+  // First card must be a text card (not special)
+  let startIndex = deck.findIndex(c => c.type === 'text');
+  const [startCard] = deck.splice(startIndex, 1);
+
+  state = {
+    players,
+    hands,
+    deck,
+    discard: [startCard],
+    currentPlayer: 0,
+    direction: 1, // 1 = clockwise, -1 = counter
+    wildColor: null, // color override after wild
+    drawnThisTurn: false,
+    fleetDeclared: [], // indices who declared fleet
+    fleetPending: false, // player has 1 card but hasn't declared yet
+    gameOver: false,
+    mustDrawCount: 0, // for JP stacking
+    lastActions: {}, // playerIndex -> { text, color } 直前の行動
+  };
+}
+
+// ===== PLAYABILITY LOGIC =====
+function getTopCard() { return state.discard[state.discard.length - 1]; }
+function getEffectiveColor() {
+  if (state.wildColor) return state.wildColor;
+  return getTopCard().color;
+}
+
+// Get the chain object for a card
+function getChain(card) {
+  if (card.type !== 'text') return null;
+  return CREDO_CHAINS.find(c => c.id === card.chainId);
+}
+
+// Check if cardB can follow cardA as a phrase continuation
+function canChain(cardA, cardB) {
+  if (cardA.type !== 'text' || cardB.type !== 'text') return false;
+  if (!cardA.isLast) return false; // cardA must be the last in its chain
+
+  // Any chain's first card can follow
+  return cardB.isFirst;
+}
+
+function canPlay(card, forPlayer) {
+  if (state.gameOver) return false;
+  if (forPlayer !== state.currentPlayer && forPlayer !== undefined) return false;
+
+  const top = getTopCard();
+  const effectiveColor = getEffectiveColor();
+
+  // Special cards: must match effective color (unless wild)
+  if (card.type === 'wild') return true; // Wild can always be played on matching color? 
+  // Actually wild古里: must match color like other specials
+  if (card.type === 'wild') {
+    return card.color === effectiveColor || effectiveColor === 'black';
+  }
+
+  if (card.type === 'special') {
+    return card.color === effectiveColor;
+  }
+
+  // Text cards
+  // 1. Same color
+  if (card.color === effectiveColor) return true;
+  // 2. Phrase continuation (color override)
+  if (top.type === 'text' && top.isLast && card.isFirst) return true;
+
+  return false;
+}
+
+// ===== SETUP UI =====
+let aiCount = 2;
+const defaultAiNames = ['古里さん', '栗原さん', 'JPさん'];
+
+function showSetup() {
+  showScreen('setupScreen');
+  setAiCount(2);
+}
+
+function setAiCount(n) {
+  aiCount = n;
+  document.querySelectorAll('.count-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === n - 1);
+  });
+  renderAiNames();
+}
+
+function renderAiNames() {
+  const list = document.getElementById('aiNameList');
+  list.innerHTML = '';
+  for (let i = 0; i < aiCount; i++) {
+    const row = document.createElement('div');
+    row.className = 'ai-player-row';
+    row.innerHTML = `<input class="setup-input" id="aiName${i}" value="${defaultAiNames[i]}" placeholder="AI ${i+1}">`;
+    list.appendChild(row);
+  }
+}
+
+function startGame() {
+  const myName = document.getElementById('playerName').value || 'プレイヤー1';
+  const players = [{ name: myName, isHuman: true }];
+  for (let i = 0; i < aiCount; i++) {
+    const n = document.getElementById(`aiName${i}`)?.value || `AI${i+1}`;
+    players.push({ name: n, isHuman: false });
+  }
+
+  initState(players);
+  showScreen('gameScreen');
+  renderAll();
+  setLog(`ゲーム開始！${players[0].name}のターンです`, 'highlight');
+
+  if (!state.players[0].isHuman) {
+    setTimeout(aiTurn, 800);
+  }
+}
+
+// ===== RENDERING =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderAll() {
+  renderOpponents();
+  renderTopCard();
+  renderHand();
+  renderDeckCount();
+  renderButtons();
+  renderDirection();
+}
+
+function colorLabel(color) {
+  const map = { blue:'青', red:'赤', yellow:'黄', green:'緑', orange:'橙', black:'黒' };
+  return map[color] || color;
+}
+
+function renderOpponents() {
+  const area = document.getElementById('opponentsArea');
+  area.innerHTML = '';
+  state.players.forEach((p, i) => {
+    if (p.isHuman) return;
+    const div = document.createElement('div');
+    div.className = 'opponent-card' + (i === state.currentPlayer ? ' active-turn' : '');
+    const hasFleet = state.fleetDeclared.includes(i);
+    const action = state.lastActions[i];
+    const colorMap = { blue:'#4a9eff', red:'#ff5a5a', yellow:'#ffd93d', green:'#4adf8a', orange:'#ff8c42', black:'#aaa', draw:'#8a8070' };
+    const actionHTML = action
+      ? `<div class="opponent-last-action" style="border-color:${colorMap[action.color]||'#555'};color:${colorMap[action.color]||'#aaa'}">${action.text}</div>`
+      : `<div class="opponent-last-action" style="border-color:var(--border);color:var(--muted)">まだ未行動</div>`;
+    div.innerHTML = `
+      ${hasFleet ? '<div class="fleet-badge">フリート！</div>' : ''}
+      <div class="opponent-name">${p.name}</div>
+      <div class="opponent-hand-count">${state.hands[i].length}<span>枚</span></div>
+      ${actionHTML}
+    `;
+    area.appendChild(div);
+  });
+}
+
+function renderTopCard() {
+  const top = getTopCard();
+  const el = document.getElementById('topCardDisplay');
+  const effColor = getEffectiveColor();
+  el.className = `top-card-display ${effColor}`;
+
+  if (top.type === 'wild') {
+    el.innerHTML = `<div class="card-special">🖤</div><div class="card-text">${top.text}</div>${state.wildColor ? `<div class="card-special-name" style="margin-top:4px">→ ${colorLabel(state.wildColor)}</div>` : ''}`;
+  } else if (top.type === 'special') {
+    const icon = top.special === 'draw2' ? '＋２' : '⟲';
+    el.innerHTML = `<div class="card-special" style="font-size:28px">${icon}</div><div class="card-text">${top.text}</div>`;
+  } else {
+    el.innerHTML = `<div class="card-text" style="font-size:13px">${top.text}</div>`;
+  }
+
+  // Update color indicator banner
+  const colorEmoji = { blue:'🔵', red:'🔴', yellow:'🟡', green:'🟢', orange:'🟠', black:'⚫' };
+  const colorName = { blue:'青', red:'赤', yellow:'黄', green:'緑', orange:'オレンジ', black:'指定なし' };
+  const ind = document.getElementById('colorIndicator');
+  ind.className = `color-indicator ${effColor}`;
+  ind.innerHTML = `${colorEmoji[effColor]} 有効色：<strong>${colorName[effColor]}</strong>`;
+}
+
+function renderHand() {
+  const container = document.getElementById('handContainer');
+  container.innerHTML = '';
+  const hand = state.hands[0];
+  const isMyTurn = state.currentPlayer === 0;
+  const colorEmoji = { blue:'🔵', red:'🔴', yellow:'🟡', green:'🟢', orange:'🟠', black:'⚫' };
+
+  hand.forEach((card, idx) => {
+    const div = document.createElement('div');
+    const playable = isMyTurn && canPlay(card, 0);
+    div.className = `card ${card.color}${playable ? ' playable' : ' not-playable'}`;
+
+    const colorDot = `<div style="position:absolute;top:4px;left:4px;font-size:8px;opacity:0.7">${colorEmoji[card.color]||''}</div>`;
+
+    if (card.type === 'wild') {
+      div.innerHTML = `${colorDot}<div class="card-special">🖤</div><div class="card-text">${card.text}</div>`;
+    } else if (card.type === 'special') {
+      const icon = card.special === 'draw2' ? '＋２' : '⟲';
+      div.innerHTML = `${colorDot}<div class="card-special">${icon}</div><div class="card-text" style="font-size:8px">${card.text}</div>`;
+    } else {
+      div.innerHTML = `${colorDot}<div class="card-text">${card.text}</div>`;
+    }
+
+    if (playable) {
+      div.onclick = () => playCard(0, idx);
+    }
+    container.appendChild(div);
+  });
+}
+
+function renderDeckCount() {
+  document.getElementById('deckCount').textContent = state.deck.length;
+}
+
+function renderButtons() {
+  const isMyTurn = state.currentPlayer === 0;
+  const passBtn = document.getElementById('passBtn');
+  const fleetBtn = document.getElementById('fleetBtn');
+  const drawPile = document.getElementById('drawPile');
+
+  passBtn.disabled = !(isMyTurn && state.drawnThisTurn);
+  drawPile.classList.toggle('disabled', !isMyTurn || state.drawnThisTurn);
+
+  // Fleet button: show when I have exactly 1 card and haven't declared
+  const shouldShowFleet = state.hands[0].length === 1 && !state.fleetDeclared.includes(0);
+  fleetBtn.disabled = !shouldShowFleet;
+}
+
+function renderDirection() {
+  document.getElementById('directionBadge').textContent =
+    state.direction === 1 ? '→ 時計回り' : '← 反時計回り';
+}
+
+// ===== PLAY LOGIC =====
+function playCard(playerIdx, cardIdx) {
+  if (state.gameOver) return;
+  if (playerIdx !== state.currentPlayer) return;
+
+  const card = state.hands[playerIdx][cardIdx];
+  if (!canPlay(card, playerIdx)) {
+    setLog('そのカードは出せません！', 'error');
+    return;
+  }
+
+  // Remove from hand
+  state.hands[playerIdx].splice(cardIdx, 1);
+  state.discard.push(card);
+  state.wildColor = null;
+  state.drawnThisTurn = false;
+
+  const playerName = state.players[playerIdx].name;
+
+  // Check fleet penalty: had 1 card (now 0 means won), but 2 cards -> now 1 means need to declare
+  // Fleet check is separate
+
+  // Handle special effects
+  if (card.special === 'wild') {
+    setLog(`${playerName} がワイルド古里を出しました！色を選んでください`, 'highlight');
+    if (playerIdx === 0) {
+      showColorModal(playerIdx);
+    } else {
+      // AI picks color
+      const aiColor = aiChooseColor(playerIdx);
+      state.wildColor = aiColor;
+      recordAction(playerIdx, `🖤 ワイルド古里 → ${colorLabel(aiColor)}`, 'black');
+      setLog(`${playerName} がワイルド古里を出しました！→ ${colorLabel(aiColor)}`, 'highlight');
+      afterPlayCard(playerIdx);
+    }
+    renderAll();
+    return;
+  }
+
+  if (card.special === 'draw2') {
+    const next = nextPlayerIndex(state.currentPlayer, state.direction);
+    for (let i = 0; i < 2; i++) {
+      if (state.deck.length === 0) reshuffleDiscard();
+      if (state.deck.length > 0) state.hands[next].push(state.deck.pop());
+    }
+    recordAction(playerIdx, `＋２ JP`, card.color);
+    setLog(`${playerName} がJPを出した！${state.players[next].name} は2枚引きます`, 'highlight');
+    afterPlayCard(playerIdx);
+    renderAll();
+    return;
+  }
+
+  if (card.special === 'reverse') {
+    state.direction *= -1;
+    recordAction(playerIdx, `⟲ 栗原さん`, card.color);
+    setLog(`${playerName} が栗原さんを出した！順番が逆になります`, 'highlight');
+    afterPlayCard(playerIdx);
+    renderAll();
+    return;
+  }
+
+  // Normal card
+  recordAction(playerIdx, `「${card.text}」`, card.color);
+  setLog(`${playerName} が「${card.text}」を出しました`, '');
+  afterPlayCard(playerIdx);
+  renderAll();
+}
+
+function afterPlayCard(playerIdx) {
+  // Check win (no cards left + not a special card)
+  const hand = state.hands[playerIdx];
+  const lastCard = state.discard[state.discard.length - 1];
+
+  if (hand.length === 0) {
+    if (lastCard.type === 'special' || lastCard.type === 'wild') {
+      // Special card finish not allowed - give back the card
+      hand.push(state.discard.pop());
+      setLog('特殊カードでは上がれません！カードを戻します', 'error');
+      renderAll();
+      return;
+    }
+    // Check fleet declaration
+    if (!state.fleetDeclared.includes(playerIdx)) {
+      // Penalty! Should have declared fleet
+      const penaltyCards = 2;
+      for (let i = 0; i < penaltyCards; i++) {
+        if (state.deck.length === 0) reshuffleDiscard();
+        if (state.deck.length > 0) hand.push(state.deck.pop());
+      }
+      setLog(`${state.players[playerIdx].name} がフリートを言い忘れた！2枚引きます`, 'error');
+      advanceTurn();
+      renderAll();
+      return;
+    }
+
+    // Win!
+    state.gameOver = true;
+    setTimeout(() => showWin(playerIdx), 800);
+    return;
+  }
+
+  // Check if player now has 1 card → need fleet
+  if (hand.length === 1 && playerIdx !== 0) {
+    // AI auto-declares fleet
+    if (!state.fleetDeclared.includes(playerIdx)) {
+      state.fleetDeclared.push(playerIdx);
+      setLog(`${state.players[playerIdx].name}「フリート！！」`, 'success');
+    }
+  }
+
+  advanceTurn();
+}
+
+function advanceTurn() {
+  state.currentPlayer = nextPlayerIndex(state.currentPlayer, state.direction);
+  state.drawnThisTurn = false;
+
+  if (!state.players[state.currentPlayer].isHuman) {
+    renderAll();
+    setTimeout(aiTurn, 900);
+  } else {
+    renderAll();
+    setLog(`あなたのターンです`, 'highlight');
+  }
+}
+
+function nextPlayerIndex(current, dir) {
+  const n = state.players.length;
+  return (current + dir + n) % n;
+}
+
+function drawCard() {
+  if (state.gameOver) return;
+  if (state.currentPlayer !== 0) return;
+  if (state.drawnThisTurn) return;
+
+  if (state.deck.length === 0) reshuffleDiscard();
+  if (state.deck.length === 0) { setLog('山札がありません', 'error'); return; }
+
+  const drawn = state.deck.pop();
+  state.hands[0].push(drawn);
+  state.drawnThisTurn = true;
+  setLog(`1枚引きました「${drawn.text}」${canPlay(drawn, 0) ? ' ← 出せます！' : ''}`, '');
+  renderAll();
+}
+
+function endTurn() {
+  if (!state.drawnThisTurn || state.currentPlayer !== 0) return;
+  setLog(`パスしました`, '');
+  advanceTurn();
+}
+
+function declareFleet() {
+  if (!state.fleetDeclared.includes(0)) {
+    state.fleetDeclared.push(0);
+    setLog(`「フリート！！」宣言しました！`, 'success');
+    renderButtons();
+  }
+}
+
+function reshuffleDiscard() {
+  if (state.discard.length <= 1) return;
+  const top = state.discard.pop();
+  state.deck = shuffle([...state.discard]);
+  state.discard = [top];
+}
+
+// ===== COLOR MODAL =====
+function showColorModal() {
+  document.getElementById('colorModal').classList.add('show');
+}
+
+function chooseColor(color) {
+  document.getElementById('colorModal').classList.remove('show');
+  state.wildColor = color;
+  setLog(`色を「${colorLabel(color)}」に指定しました`, 'highlight');
+  afterPlayCard(0);
+  renderAll();
+}
+
+// ===== AI LOGIC =====
+function aiTurn() {
+  if (state.gameOver) return;
+  if (state.players[state.currentPlayer].isHuman) return;
+
+  const pi = state.currentPlayer;
+  const hand = state.hands[pi];
+  const name = state.players[pi].name;
+
+  // Find playable cards
+  const playable = hand.map((c, i) => ({ card: c, idx: i })).filter(({ card }) => canPlay(card, pi));
+
+  if (playable.length > 0) {
+    // Strategy: prefer text cards, avoid ending on special
+    let chosen = playable[0];
+    // Prefer non-special if possible
+    const textOpts = playable.filter(p => p.card.type === 'text');
+    if (textOpts.length > 0) chosen = textOpts[Math.floor(Math.random() * textOpts.length)];
+
+    playCard(pi, chosen.idx);
+  } else {
+    // Draw
+    if (state.deck.length === 0) reshuffleDiscard();
+    if (state.deck.length > 0) {
+      const drawn = state.deck.pop();
+      hand.push(drawn);
+      recordAction(pi, `📥 1枚引いた`, 'draw');
+      setLog(`${name} が1枚引きました`, '');
+
+      // Check if drawn card is playable
+      const drawnIdx = hand.length - 1;
+      if (canPlay(drawn, pi)) {
+        setTimeout(() => playCard(pi, drawnIdx), 600);
+      } else {
+        setTimeout(() => {
+          advanceTurn();
+        }, 600);
+      }
+      renderAll();
+      return;
+    }
+    advanceTurn();
+  }
+}
+
+function recordAction(playerIdx, text, color) {
+  state.lastActions[playerIdx] = { text, color };
+}
+
+function aiChooseColor(playerIdx) {
+  const hand = state.hands[playerIdx];
+  const colorCount = {};
+  ['blue','red','yellow','green','orange'].forEach(c => colorCount[c] = 0);
+  hand.forEach(c => { if (colorCount[c.color] !== undefined) colorCount[c.color]++; });
+  return Object.entries(colorCount).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+// ===== MISC =====
+function setLog(msg, type = '') {
+  const el = document.getElementById('logText');
+  el.textContent = msg;
+  el.className = 'log-text' + (type ? ` ${type}` : '');
+}
+
+function showWin(playerIdx) {
+  document.getElementById('winnerName').textContent =
+    `🎉 ${state.players[playerIdx].name} の勝利！`;
+  showScreen('winScreen');
+}
+
+function showTitle() {
+  showScreen('titleScreen');
+}
+
+function hideTurnOverlay() {
+  document.getElementById('turnOverlay').classList.remove('show');
+}
+
+function toggleRules() {
+  document.getElementById('rulesModal').classList.toggle('show');
+}
+
+// Init setup screen
+showSetup();
+renderAiNames();
+</script>
+</body>
+</html>
